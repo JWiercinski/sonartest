@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"gorm.io/driver/sqlite"
@@ -29,7 +30,10 @@ func main() {
 	backend.GET("/products", sendProducts)
 	backend.POST("/payment", logPayment)
 	backend.POST("/basket", logBasket)
-	backend.Start(":22222")
+	err := backend.Start(":22222")
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func home(context echo.Context) error {
@@ -150,8 +154,11 @@ func connectDB() *gorm.DB {
 	if err != nil {
 		panic("Nie można ustanowić połączenia z bazą danych")
 	}
-	database.AutoMigrate(&paymentdb{})
-	database.AutoMigrate(&boughtGames{})
+	err1 := database.AutoMigrate(&paymentdb{})
+	err2 := database.AutoMigrate(&boughtGames{})
+	if err1 != nil && err2 != nil {
+		panic("Nie udało się dokonać automigracji")
+	}
 	return database
 }
 
